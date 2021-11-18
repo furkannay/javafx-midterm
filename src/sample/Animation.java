@@ -11,6 +11,8 @@ import javafx.util.Duration;
 import javafx.scene.paint.Color;
 
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,6 +20,8 @@ import java.util.Random;
 
 public class Animation extends Application {
     static ArrayList<double[]> ballsizeArraylist = new ArrayList<>();
+    int numofShapes = 111;
+    int countofball = 0;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -28,14 +32,13 @@ public class Animation extends Application {
         Group group = new Group(canvas);
         Scene scene = new Scene(group, width, height);
 
-
-
-
-        for (int i = 0; i<50; i++){
+        double[][] positions = readFile();
+        for (int i = 0; i<numofShapes; i++){
             addBallwithTransition((int) (Math.random()*25),primaryStage,group,scene);
 //            Thread.sleep(100);
         }
-        saveToFile();
+        if (numofShapes > positions.length)
+        {saveToFile();}
 
 
         primaryStage.setScene(scene);
@@ -44,28 +47,38 @@ public class Animation extends Application {
     public static void main(String[] args) {
         Application.launch(args);
     }
-    private Circle addBall(Stage primaryStage, Group grup, Scene scen, int radius){
-
-
+    private Circle addBall(Stage primaryStage, Group grup, Scene scen, int radius,double[]... posxy){
         Circle ball = new Circle(radius);
-        double random = Math.random()*800;
-        double random2 = Math.random()*800;
-        ball.setCenterX(random);
-        ball.setCenterY(random2);
-        double[] ballxy = new double[] {random,random2};
-        ballsizeArraylist.add(ballxy);
+
+        if (posxy.length != 0){
+
+            ball.setCenterX(posxy[countofball][0]);
+            ball.setCenterX(posxy[countofball][1]);
+
+        }
+        else{
+            double random = Math.random()*800;
+            double random2 = Math.random()*800;
+            ball.setCenterX(random);
+            ball.setCenterY(random2);
+            double[] ballxy = new double[] {random,random2};
+            ballsizeArraylist.add(ballxy);
+
+        }
+
         ball.setFill(Color.color(Math.random(), Math.random(), Math.random()));
 //        ball.setFill(Paint.valueOf("green"));
         grup.getChildren().add(ball);
+        countofball++;
         return ball;
     }
 
-    private void addBallwithTransition(int radius,Stage primaryStage, Group grup, Scene scen){
+    private void addBallwithTransition(int radius,Stage primaryStage, Group grup, Scene scen, double[]... posxy){
 
 
-        Circle my_ball = addBall(primaryStage,grup,scen,radius);
+        Circle my_ball = addBall(primaryStage,grup,scen,radius,posxy);
 
-        Duration duration = Duration.millis(Math.random()*10000);
+        Duration duration = Duration.millis(Math.random()*1);
         //Create new translate transition
         TranslateTransition transition = new TranslateTransition(duration, my_ball);
         //Move in X axis by +200
@@ -81,6 +94,49 @@ public class Animation extends Application {
         transition.setCycleCount((int) (Math.random()*20));
         transition.play();
     }
+
+    public double[][] readFile() {
+        double[][] places = new double[numofShapes][2];
+        try {
+
+            String location = "ballsizes.txt";
+            String all = Files.readString(Path.of(location));
+            String[] lines = all.split("\n");
+            int i = 0;
+            for (String line:lines
+            ) {
+
+                String[] valuesList = line.split(" ");
+                double x = Double.parseDouble(valuesList[0]);
+                double y = Double.parseDouble(valuesList[1]);
+                places[i] = new double[] {x,y};
+                i++;
+
+            }
+            System.out.println("biyudy");
+            System.out.println(all);
+            System.out.println("buydu");
+
+        }
+        catch (Exception e){
+            System.out.println(e);
+            System.out.println("bruh");
+
+
+        }
+        for (double[]a :places
+        ) {
+            for (double b:a
+            ) {
+                System.out.println(b);
+
+            }
+
+        }
+        return places;
+
+    }
+
     public String saveToFile() {
         try {
             FileWriter writer = new FileWriter("ballsizes.txt");
@@ -92,11 +148,11 @@ public class Animation extends Application {
 
                     String xy1 = Double.toString(xy);
                     if (i ==0){
-                    String thii = "x: "+ xy + "  ";
+                    String thii = String.valueOf(xy);
                     writer.write(thii);
                     System.out.print(thii);
                     }
-                    else{String thii = "y: "+ xy + "  ";
+                    else{String thii = " "+ xy;
                     System.out.print(thii);
                     writer.write(thii);}
                     i++;
